@@ -3,9 +3,6 @@
 Analysis code and result artifacts accompanying the manuscript:
 
 > **A reproducible and auditable pipeline for single-trial EEG decoding using Riemannian tangent-space regression and multi-seed permutation validation**
->
-> Huang Tan, Yajing Liu, Weiqian Hu, Xiao Liang, Guangqiang Yin (corresponding author: yingq@uestc.edu.cn)
->
 > Under review at *Cell Reports Methods*.
 
 ## What this repository contains
