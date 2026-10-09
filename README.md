@@ -6,7 +6,7 @@ Analysis code and result artifacts accompanying the manuscript:
 >
 > Huang Tan, Yajing Liu, Weiqian Hu, Xiao Liang, Guangqiang Yin (corresponding author: yingq@uestc.edu.cn)
 >
-> Submitted to *Computer Methods and Programs in Biomedicine*.
+> Under review at *Cell Reports Methods*.
 
 ## What this repository contains
 
@@ -118,8 +118,8 @@ accompanying manuscript:
 
 > Tan H., Liu Y., Hu W., Liang X., Yin G. *A reproducible and auditable
 > pipeline for single-trial EEG decoding using Riemannian tangent-space
-> regression and multi-seed permutation validation.* Submitted to Computer
-> Methods and Programs in Biomedicine.
+> regression and multi-seed permutation validation.* Under review at Cell
+> Reports Methods.
 
 ## License
 
