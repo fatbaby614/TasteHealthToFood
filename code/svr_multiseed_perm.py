@@ -30,20 +30,22 @@ def _loso_mean_r_pool(X_pool, y_pool, split_idx, max_trials=200, random_state=42
                                  np.arange(end_te, len(y_pool))])
         if len(tr_idx) == 0:
             continue
-        logm_tr = X_pool[tr_idx]
-        y_tr = y_pool[tr_idx]
-        if len(y_tr) > max_trials:
-            med = np.median(y_tr)
-            idx_h = np.where(y_tr >= med)[0]
-            idx_l = np.where(y_tr < med)[0]
+        y_tr_all = y_pool[tr_idx]
+        if len(y_tr_all) > max_trials:
+            med = np.median(y_tr_all)
+            idx_h = np.where(y_tr_all >= med)[0]
+            idx_l = np.where(y_tr_all < med)[0]
             n_each = max_trials // 2
             if len(idx_h) > n_each:
                 idx_h = rng.choice(idx_h, n_each, replace=False)
             if len(idx_l) > n_each:
                 idx_l = rng.choice(idx_l, n_each, replace=False)
             pick = np.concatenate([idx_h, idx_l])
-            logm_tr = logm_tr[pick]
-            y_tr = y_tr[pick]
+            sel = tr_idx[pick]
+        else:
+            sel = tr_idx
+        logm_tr = X_pool[sel]
+        y_tr = y_pool[sel]
         logm_te = X_pool[start_te:end_te]
         y_te = y_pool[start_te:end_te]
         if len(y_te) < 3:

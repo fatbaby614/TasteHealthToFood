@@ -18,6 +18,7 @@ r≈0.015–0.016）：
 """
 import sys
 import time
+import argparse
 from pathlib import Path
 
 import numpy as np
@@ -48,12 +49,17 @@ def label_budget(b):
     return 'inf' if b >= INF else str(b)
 
 
-def main(quick=False):
+def main(quick=False, pool_only=False, pool_budgets=None, per_subject_budgets=None):
     t_start = time.time()
     subject_ids = load_subject_list()
     if quick:
         subject_ids = subject_ids[:10]
-    print(f'B2 预算敏感性诊断: {len(subject_ids)} 被试')
+    pool_budgets = pool_budgets or POOL_BUDGETS
+    per_subject_budgets = per_subject_budgets or PER_SUBJECT_BUDGETS
+    if pool_only:
+        per_subject_budgets = []
+    print(f'B2 预算敏感性诊断: {len(subject_ids)} 被试'
+          f' (per_subject={per_subject_budgets}, pool={list(pool_budgets)})')
 
     wname = next(k for k in TIME_WINDOWS if k.startswith('full'))
     tw = TIME_WINDOWS[wname]
@@ -91,7 +97,7 @@ def main(quick=False):
             continue
 
         # ---- per_subject 语义（run_loso_svr，v1 固定内部 rng，单次实现）----
-        for budget in PER_SUBJECT_BUDGETS:
+        for budget in per_subject_budgets:
             results = run_loso_svr(subject_ids, target_col, tw,
                                    max_trials=budget,
                                    logm_by_sid=logm_by_sid, y_by_sid=y_by_sid)
@@ -109,7 +115,7 @@ def main(quick=False):
             y_pool = np.concatenate([y_by_sid[s] for s in sid_order], axis=0)
             cumsum = np.cumsum([0] + [len(logm_by_sid[s]) for s in sid_order])
             split_idx = np.array(list(zip(cumsum[:-1], cumsum[1:])))
-            for budget in POOL_BUDGETS:
+            for budget in pool_budgets:
                 rs = [_loso_mean_r_pool(X_pool, y_pool, split_idx,
                                         max_trials=budget, random_state=seed,
                                         tangent_space_logeuclid=tangent_space_logeuclid,
@@ -173,4 +179,13 @@ def main(quick=False):
 
 
 if __name__ == '__main__':
-    main(quick='--quick' in sys.argv)
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--quick', action='store_true', help='10 被试冒烟')
+    ap.add_argument('--pool-only', action='store_true',
+                    help='只跑池级语义（跳过昂贵的 per_subject 曲线）')
+    ap.add_argument('--pool-budgets', type=str, default='',
+                    help='逗号分隔的池级预算梯度，如 50,100,200,400')
+    args = ap.parse_args()
+    budgets = ([int(x) for x in args.pool_budgets.split(',') if x.strip()]
+               if args.pool_budgets else None)
+    main(quick=args.quick, pool_only=args.pool_only, pool_budgets=budgets)

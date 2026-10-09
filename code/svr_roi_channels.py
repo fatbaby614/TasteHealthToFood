@@ -181,7 +181,12 @@ def loso_svr_roi(logm_by_sid, y_by_sid, subject_ids, logm_all_keys=None,
 
 def _loso_mean_r(X, y, split_idx, max_trials=200, random_state=42):
     """内部 LOSO：给定 logm 矩阵 X / 目标 y / 被试边界 split_idx，
-    返回 mean of per-subject Pearson r。"""
+    返回 mean of per-subject Pearson r。
+
+    性能：平衡抽样先在被试内位置索引（1 维 y）上完成，再只 gather 抽中的
+    试次行，避免先整块复制训练集 —— 全脑 64 通道时训练集约 745 MB/折，
+    整块 gather 会浪费约 MaxTrials/ntr ≈ 100 倍内存带宽。rng 调用顺序与
+    参数与旧实现相同，故结果逐位一致。"""
     rng = np.random.RandomState(random_state)
     rs = []
     for k in range(len(split_idx)):
@@ -190,20 +195,22 @@ def _loso_mean_r(X, y, split_idx, max_trials=200, random_state=42):
         tr_idx = np.concatenate([np.arange(0, start_tr), np.arange(end_tr, len(y))])
         if len(tr_idx) == 0:
             continue
-        logm_tr = X[tr_idx]
-        y_tr = y[tr_idx]
-        if len(y_tr) > max_trials:
-            med = np.median(y_tr)
-            idx_h = np.where(y_tr >= med)[0]
-            idx_l = np.where(y_tr < med)[0]
+        y_tr_all = y[tr_idx]
+        if len(y_tr_all) > max_trials:
+            med = np.median(y_tr_all)
+            idx_h = np.where(y_tr_all >= med)[0]
+            idx_l = np.where(y_tr_all < med)[0]
             n_each = max_trials // 2
             if len(idx_h) > n_each:
                 idx_h = rng.choice(idx_h, n_each, replace=False)
             if len(idx_l) > n_each:
                 idx_l = rng.choice(idx_l, n_each, replace=False)
             pick = np.concatenate([idx_h, idx_l])
-            logm_tr = logm_tr[pick]
-            y_tr = y_tr[pick]
+            sel = tr_idx[pick]
+        else:
+            sel = tr_idx
+        logm_tr = X[sel]
+        y_tr = y[sel]
         # 测试
         logm_te = X[start_tr:end_tr]
         y_te = y[start_tr:end_tr]
