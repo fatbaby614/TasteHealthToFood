@@ -98,6 +98,13 @@ replicates tabulated at S ∈ {5, 10} — writing
 `outputs/results/`. A full audit rerun takes considerably longer than the
 exploratory stage and is likewise recommended inside `tmux`.
 
+Two whole-scalp budget-matched stages, `f2` (pooled unit) and `f3`
+(per-subject unit), are not part of the default `all` stage for runtime
+reasons; their outputs are not cited in the manuscript (the whole-scalp
+claim was retracted, and the reported budget sweep covers the ROI cells
+only). They can be run explicitly with
+`bash code/run_major_revision_audits.sh f2` and `... f3`.
+
 ### Pipeline stages
 
 | # | Name | What it runs |
