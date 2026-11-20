@@ -1,0 +1,19 @@
+# ============================================================
+# .gitignore — TasteHealthToFood
+# 仓库仅跟踪：code/（源代码）、README.md、LICENSE、.gitignore
+# 其余所有文件与目录（paper/、outputs/、literature/、results/、
+# drafts/、data/、backup/、outputs0830/ 等）均在本地保留、
+# 不纳入版本控制。
+# ============================================================
+
+# Python 字节码缓存
+__pycache__/
+*.py[cod]
+
+# 忽略所有顶层条目
+/*
+# 仅重新纳入以下四项
+!/.gitignore
+!/README.md
+!/LICENSE
+!/code/
